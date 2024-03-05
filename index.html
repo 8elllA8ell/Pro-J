@@ -17,7 +17,6 @@
     
             let dateTime = [];
             const apiKey = '058181e0ef5153da030c5d26cd04b2be';
-    
             document.addEventListener('DOMContentLoaded', () => {
                 getCoordinates();
             });
@@ -103,7 +102,7 @@
             }
     
             function displayValues(valueIndex, containerIndex, imageIndex) {
-              let intValue = Math.floor(predictedValue[valueIndex]/15);
+              let intValue = Math.floor(predictedValue[valueIndex] / 12 + (Math.random() * 10));
               const resultContainer = document.getElementById(`myElement${containerIndex}`);
               const resultContainerimg = document.getElementById(`myimgElement${imageIndex}`);
               resultContainer.innerHTML = `<p>${intValue}</p>`;
@@ -125,15 +124,15 @@
             let intValue = Math.floor(predictedValue[0]/15);
             const resultContainerimg2 = document.getElementById(`adtoday`);
             if (intValue >= 0 && intValue <= 25) {
-                  resultContainerimg2.innerHTML = `<img src="images/Slide2.PNG" alt="" width="1140">`;
+                  resultContainerimg2.innerHTML = `<img src="images/Slide2.PNG" alt="" width="800">`;
               } else if (intValue >= 26 && intValue <= 50) {
-                  resultContainerimg2.innerHTML = `<img src="images/Slide3.PNG" alt="" width="1140">`;
+                  resultContainerimg2.innerHTML = `<img src="images/Slide3.PNG" alt="" width="800">`;
               } else if (intValue >= 51 && intValue <= 90) {
-                  resultContainerimg2.innerHTML = `<img src="images/Slide4.PNG" alt="" width="1140" >`;
+                  resultContainerimg2.innerHTML = `<img src="images/Slide4.PNG" alt="" width="800" >`;
               } else if (intValue >= 51 && intValue <= 90) {
-                resultContainerimg2.innerHTML = `<img src="images/Slide5.PNG" alt="" width="1140">`;
+                resultContainerimg2.innerHTML = `<img src="images/Slide5.PNG" alt="" width="800">`;
               } else {
-                  resultContainerimg2.innerHTML = `<img src="images/Slide6.PNG" alt="" width="1140">`;
+                  resultContainerimg2.innerHTML = `<img src="images/Slide6.PNG" alt="" width="800">`;
               }
           }
 
@@ -175,7 +174,7 @@
     <meta property="og:title" content="Home">
     <meta property="og:type" content="website">
   <meta data-intl-tel-input-cdn-path="intlTelInput/"></head>
-  <body data-home-page="Home.html" data-home-page-title="Home" data-path-to-root="./" data-include-products="false" class="u-body u-xl-mode" data-lang="en"><header class="u-clearfix u-header u-header" id="sec-8803"><div class="u-clearfix u-sheet u-sheet-1">
+  <body data-home-page="index.html" data-home-page-title="Home" data-path-to-root="./" data-include-products="false" class="u-body u-xl-mode" data-lang="en"><header class="u-clearfix u-header u-header" id="sec-8803"><div class="u-clearfix u-sheet u-sheet-1">
         <nav class="u-menu u-menu-one-level u-offcanvas u-menu-1">
           <div class="menu-collapse" style="font-size: 1.125rem; letter-spacing: 0px;">
             <a class="u-button-style u-custom-left-right-menu-spacing u-custom-padding-bottom u-custom-top-bottom-menu-spacing u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="#">
@@ -186,8 +185,8 @@
           </div>
           <div class="u-custom-menu u-nav-container">
             <ul class="u-custom-font u-nav u-text-font u-unstyled u-nav-1"><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="index.html" style="padding: 10px 20px;">Home</a>
-</li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="About.html" style="padding: 10px 20px;">About</a>
-</li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="Contact.html" style="padding: 10px 20px;">Contact</a>
+            </li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="Contact.html" style="padding: 10px 20px;">NerdSite</a>
+            </li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="About.html" style="padding: 10px 20px;">Contact</a>
 </li></ul>
           </div>
           <div class="u-custom-menu u-nav-container-collapse">
@@ -410,7 +409,8 @@
     </section>
     <section class="u-align-center u-clearfix u-section-3" id="sec-3def">
       <div class="u-clearfix u-sheet u-sheet-1">
-        <h1>พยากรอากาศ</h1>
+        <h1></h1>
+        <br>
         <div><iframe src= "https://www.tmd.go.th/weatherForecast7DaysWidget?province=เชียงใหม่" height="500" width="1050" scrolling="no" frameborder="0"></iframe></div>
       </div>
     </section>
@@ -424,3 +424,4 @@
   
   
 </body></html>
+
