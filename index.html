@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html style="font-size: 16px;" lang="en"><head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="It&amp;apos;s That Design Feeling">
+    <meta name="description" content="">
+    <title>Home</title>
+    <link rel="stylesheet" href="nicepage.css" media="screen">
+<link rel="stylesheet" href="Home.css" media="screen">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script class="u-script" type="text/javascript" src="jquery.js" defer=""></script>
+    <script class="u-script" type="text/javascript" src="nicepage.js" defer=""></script>
+    <meta name="generator" content="Nicepage 6.3.1, nicepage.com">
+    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
+
+        <script>
+    
+            let dateTime = [];
+            const apiKey = '058181e0ef5153da030c5d26cd04b2be';
+    
+            document.addEventListener('DOMContentLoaded', () => {
+                getCoordinates();
+            });
+    
+            function getCoordinates() {
+                const selectedCity = 'Chiang Mai';
+                const apiUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${selectedCity},TH&limit=1&appid=${apiKey}`;
+    
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        const coordinates = data[0].lat + ', ' + data[0].lon;
+                        console.log('Coordinates:', coordinates);
+                        fetchWeatherData(data[0].lat, data[0].lon);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                        alert('Error fetching data');
+                    });
+            }
+    
+            function fetchWeatherData(lat, lon) {
+                const weatherUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&cnt=32&units=metric`;
+    
+                fetch(weatherUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        const cityName = data.city.name;
+                        const filteredForecast = data.list.filter(entry => entry.dt_txt.includes(' 00:00:00'));
+    
+                        const forecastData = filteredForecast.map(entry => {
+                            const { main, wind, rain, dt_txt } = entry;
+                            return {
+                                dateTime: dt_txt,
+                                atmosphericPressure: main.pressure,
+                                temperature: main.temp,
+                                humidity: main.humidity,
+                                rainfall: rain ? rain['3h'] || 0 : 0,
+                                windSpeed: wind.speed
+                            };
+                        });
+    
+                        const weatherDataDiv = document.getElementById('weatherData');
+    
+                        predict(forecastData);
+                    })
+                    .catch(error => {
+                        console.error('Error making weather forecast request:', error);
+                    });
+            }
+    
+            let predictedValue = [];
+    
+            async function predict(weatherData) {
+                try {
+                    const modelPath = 'https://raw.githubusercontent.com/8elllA8ell/Pro-J/90c7fb827f94b7b4641352d3f60e678b72fff464/model/model.json';
+                    const model = await tf.loadLayersModel(modelPath);
+    
+                    let i = 0;
+                    predictedValue = [];
+    
+                    weatherData.forEach(entry => {
+                        const { atmosphericPressure, temperature, humidity, rainfall, windSpeed } = entry;
+    
+                        const inputData = tf.tensor3d([[
+                            [atmosphericPressure],
+                            [temperature],
+                            [humidity],
+                            [rainfall],
+                            [windSpeed],
+                            [0]
+                        ]]);
+    
+                        const predictions = model.predict(inputData);
+    
+                        predictedValue[i] = Array.from(predictions.dataSync());
+                        displayValues0();
+                        i++;
+                    });
+                } catch (error) {
+                    console.error('Error loading the model:', error);
+                }
+            }
+    
+            function displayValues(valueIndex, containerIndex, imageIndex) {
+              let intValue = Math.floor(predictedValue[valueIndex]/15);
+              const resultContainer = document.getElementById(`myElement${containerIndex}`);
+              const resultContainerimg = document.getElementById(`myimgElement${imageIndex}`);
+              resultContainer.innerHTML = `<p>${intValue}</p>`;
+          
+              if (intValue >= 0 && intValue <= 25) {
+                  resultContainerimg.innerHTML = `<img class="u-image u-image-circle u-image-1" src="images/emoji_0.svg" alt="" data-image-width="400" data-image-height="400">`;
+              } else if (intValue >= 26 && intValue <= 50) {
+                  resultContainerimg.innerHTML = `<img class="u-image u-image-circle u-image-1" src="images/emoji_1.svg" alt="" data-image-width="400" data-image-height="400">`;
+              } else if (intValue >= 51 && intValue <= 90) {
+                  resultContainerimg.innerHTML = `<img class="u-image u-image-circle u-image-1" src="images/emoji_2.svg" alt="" data-image-width="400" data-image-height="400">`;
+              } else if (intValue >= 51 && intValue <= 90) {
+                resultContainerimg.innerHTML = `<img class="u-image u-image-circle u-image-1" src="images/emoji_3.svg" alt="" data-image-width="400" data-image-height="400">`;
+              } else {
+                  resultContainerimg.innerHTML = `<img class="u-image u-image-circle u-image-1" src="images/emoji_4.svg" alt="" data-image-width="400" data-image-height="400">`;
+              }
+          }
+          
+          function distoday(){
+            let intValue = Math.floor(predictedValue[0]/15);
+            const resultContainerimg2 = document.getElementById(`adtoday`);
+            if (intValue >= 0 && intValue <= 25) {
+                  resultContainerimg2.innerHTML = `<img src="images/Slide2.PNG" alt="" width="1140">`;
+              } else if (intValue >= 26 && intValue <= 50) {
+                  resultContainerimg2.innerHTML = `<img src="images/Slide3.PNG" alt="" width="1140">`;
+              } else if (intValue >= 51 && intValue <= 90) {
+                  resultContainerimg2.innerHTML = `<img src="images/Slide4.PNG" alt="" width="1140" >`;
+              } else if (intValue >= 51 && intValue <= 90) {
+                resultContainerimg2.innerHTML = `<img src="images/Slide5.PNG" alt="" width="1140">`;
+              } else {
+                  resultContainerimg2.innerHTML = `<img src="images/Slide6.PNG" alt="" width="1140">`;
+              }
+          }
+
+
+          function displayValues0() {
+              displayValues(0, 0, 0);
+              distoday();
+              displayValues1();
+          }
+          
+          function displayValues1() {
+              displayValues(0, 1, 1);
+              displayValues2();
+          }
+          
+          function displayValues2() {
+              displayValues(1, 2, 2);
+              displayValues3();
+          }
+          
+          function displayValues3() {
+              displayValues(2, 3, 3);
+              displayValues4();
+          }
+          
+          function displayValues4() {
+              displayValues(3, 4, 4);
+          }
+          
+      
+
+        </script>
+    <script type="application/ld+json">{
+		"@context": "http://schema.org",
+		"@type": "Organization",
+		"name": ""
+}</script>
+    <meta name="theme-color" content="#478ac9">
+    <meta property="og:title" content="Home">
+    <meta property="og:type" content="website">
+  <meta data-intl-tel-input-cdn-path="intlTelInput/"></head>
+  <body data-home-page="Home.html" data-home-page-title="Home" data-path-to-root="./" data-include-products="false" class="u-body u-xl-mode" data-lang="en"><header class="u-clearfix u-header u-header" id="sec-8803"><div class="u-clearfix u-sheet u-sheet-1">
+        <nav class="u-menu u-menu-one-level u-offcanvas u-menu-1">
+          <div class="menu-collapse" style="font-size: 1.125rem; letter-spacing: 0px;">
+            <a class="u-button-style u-custom-left-right-menu-spacing u-custom-padding-bottom u-custom-top-bottom-menu-spacing u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="#">
+              <svg class="u-svg-link" viewBox="0 0 24 24"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#menu-hamburger"></use></svg>
+              <svg class="u-svg-content" version="1.1" id="menu-hamburger" viewBox="0 0 16 16" x="0px" y="0px" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g><rect y="1" width="16" height="2"></rect><rect y="7" width="16" height="2"></rect><rect y="13" width="16" height="2"></rect>
+</g></svg>
+            </a>
+          </div>
+          <div class="u-custom-menu u-nav-container">
+            <ul class="u-custom-font u-nav u-text-font u-unstyled u-nav-1"><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="index.html" style="padding: 10px 20px;">Home</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="About.html" style="padding: 10px 20px;">About</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="Contact.html" style="padding: 10px 20px;">Contact</a>
+</li></ul>
+          </div>
+          <div class="u-custom-menu u-nav-container-collapse">
+            <div class="u-black u-container-style u-inner-container-layout u-opacity u-opacity-95 u-sidenav">
+              <div class="u-inner-container-layout u-sidenav-overflow">
+                <div class="u-menu-close"></div>
+                <ul class="u-align-center u-nav u-popupmenu-items u-unstyled u-nav-2"><li class="u-nav-item"><a class="u-button-style u-nav-link" href="index.html">Home</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="About.html">About</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="Contact.html">Contact</a>
+</li></ul>
+              </div>
+            </div>
+            <div class="u-black u-menu-overlay u-opacity u-opacity-70"></div>
+          </div>
+        </nav>
+        <p class="u-align-center u-text u-text-default u-text-1">
+          <a class="u-active-none u-border-none u-btn u-button-link u-button-style u-hover-none u-none u-text-palette-1-base u-btn-1" href="index.html">PM2.5 Forcast<br>Useing LSTM 
+          </a>
+        </p>
+      </div></header>
+    <section class="u-clearfix u-image u-section-1" id="sec-69a1" data-image-width="626" data-image-height="418">
+      <div class="u-clearfix u-sheet u-sheet-1">
+        <div class="custom-expanded data-layout-selected u-clearfix u-gutter-10 u-layout-wrap u-layout-wrap-1">
+          <div class="u-layout" style="">
+            <div class="u-layout-row" style="">
+              <div class="u-container-style u-layout-cell u-left-cell u-size-41 u-size-xs-60 u-layout-cell-1" src="">
+                <div class="u-container-layout u-container-layout-1">
+                  <h2 class="u-align-center u-text u-text-default u-text-1"> โมเดลการทำนายค่าPM2.5</h2>
+                  <p class="u-align-center u-text u-text-2">ขั้นตอนการสร้าง รายละเอียดการทำ เอกสารโครงงาน เเละอื่น ๆ อีกมากมาย </p>
+                  <a href="Contact.html#sec-8d30" class="u-btn u-btn-round u-button-style u-radius-50 u-btn-1">learn more</a>
+                </div>
+              </div>
+              <div class="u-align-center u-container-style u-layout-cell u-right-cell u-size-19 u-size-xs-60 u-layout-cell-2" src="">
+                <div class="u-container-layout u-valign-middle u-container-layout-2" src="">
+                  <div class="u-align-center u-container-style u-group u-palette-1-base u-radius u-shape-round u-group-1">
+                    <div class="u-container-layout u-valign-bottom u-container-layout-3">
+                      <h4 class="u-text u-text-3">
+                        <br>PM 2.5 วันนี้ <br>
+                      </h4>
+<!---------------------------------------------------------------------------------------------------------->
+                      <h1 class="u-text u-text-4"><div id="myElement0">D1</div></h1>
+                      <div id="myimgElement0"></div>
+                      
+<!---------------------------------------------------------------------------------------------------------->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="u-align-center u-clearfix u-section-2" id="sec-b209">
+      <div class="u-clearfix u-sheet u-valign-top u-sheet-1">
+        <br>
+        <h2 class="u-text u-text-default u-text-1">ทำนายค่าฝุ่น PM2.5 </h2>
+        <div id="date99">เขตอำเภอเมืองจังหวัดเชียง ข้อมูลวันที่ </div>
+                    <script>
+                      // Function to format date in Thai abbreviated format
+                      function formatDateThaiAbbreviated(date) {
+                        const thaiMonths = [
+                          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                          "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+                        ];
+
+                        const dayOfMonth = date.getDate();
+                        const month = thaiMonths[date.getMonth()];
+                        const year = date.getFullYear() + 543;
+
+                        return `${dayOfMonth} ${month} ${year}`;
+                      }
+
+                      var date99 = new Date();
+                      var formattedDate = formatDateThaiAbbreviated(date99);
+
+                      document.getElementById("date99").innerHTML += formattedDate;
+                    </script>
+        <div class="u-expanded-width u-list u-list-1">
+          <div class="u-repeater u-repeater-1">
+            <div class="u-align-center u-list-item u-repeater-item">
+              <div class="u-container-layout u-similar-container u-container-layout-1">
+                <div class="u-align-center u-container-style u-expanded-width u-group u-palette-1-base u-radius u-shape-round u-group-1">
+                  <div class="u-container-layout u-container-layout-2">
+                    <h4 class="u-text u-text-3">PM 2.5<br>
+                    </h4>
+<!---------------------------------------------------------------------------------------------------------->
+                    <h1 class="u-text u-text-4"><div id="myElement1">D1</div></h1>
+                    <div id="myimgElement1"></div>
+<!---------------------------------------------------------------------------------------------------------->
+                    </div>
+                </div>
+                <h3 class="u-text u-text-default u-text-5"><div id="date0"></div></h3>
+
+                    <script>
+                      // Function to format date in Thai abbreviated format
+                      function formatDateThaiAbbreviated(date) {
+                        const thaiMonths = [
+                          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                          "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+                        ];
+
+                        const dayOfMonth = date.getDate();
+                        const month = thaiMonths[date.getMonth()];
+
+                        return `${dayOfMonth} ${month}`;
+                      }
+
+                      var date0 = new Date();
+                      var formattedDate = formatDateThaiAbbreviated(date0);
+
+                      document.getElementById("date0").innerHTML = formattedDate;
+                    </script>
+
+              </div>
+            </div>
+            <div class="u-align-center u-list-item u-repeater-item">
+              <div class="u-container-layout u-similar-container u-container-layout-3">
+                <div class="u-align-center u-container-style u-expanded-width u-group u-palette-1-base u-radius u-shape-round u-group-2">
+                  <div class="u-container-layout u-container-layout-4">
+
+                    <h4 class="u-text u-text-6">PM 2.5</h4>
+                    <h1 class="u-text u-text-4"><div id="myElement2">D2</div></h1>
+                      <div id="myimgElement2"></div></div>
+                </div>
+                <h3 class="u-text u-text-default u-text-5"><div id="date1"></div></h3>
+
+                    <script>
+                      // Function to format date in Thai abbreviated format
+                      function formatDateThaiAbbreviated(date) {
+                        const thaiMonths = [
+                          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                          "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+                        ];
+
+                        const dayOfMonth = date.getDate()+1;
+                        const month = thaiMonths[date.getMonth()];
+
+                        return `${dayOfMonth} ${month}`;
+                      }
+
+                      var date0 = new Date();
+                      var formattedDate = formatDateThaiAbbreviated(date0);
+
+                      document.getElementById("date1").innerHTML = formattedDate;
+                    </script>
+              </div>
+            </div>
+            <div class="u-align-center u-list-item u-repeater-item">
+              <div class="u-container-layout u-similar-container u-container-layout-5">
+                <div class="u-align-center u-container-style u-expanded-width u-group u-palette-1-base u-radius u-shape-round u-group-3">
+                  <div class="u-container-layout u-container-layout-6">
+                    <h4 class="u-text u-text-9">PM 2.5</h4>
+                    <h1 class="u-text u-text-4"><div id="myElement3">D1</div></h1>
+                      <div id="myimgElement3"></div></div>
+                </div>
+                <h3 class="u-text u-text-default u-text-5"><div id="date2"></div></h3>
+
+                <script>
+                  // Function to format date in Thai abbreviated format
+                  function formatDateThaiAbbreviated(date) {
+                    const thaiMonths = [
+                      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+                    ];
+
+                    const dayOfMonth = date.getDate()+2;
+                    const month = thaiMonths[date.getMonth()];
+
+                    return `${dayOfMonth} ${month}`;
+                  }
+
+                  var date2 = new Date();
+                  var formattedDate = formatDateThaiAbbreviated(date2);
+
+                  document.getElementById("date2").innerHTML = formattedDate;
+                </script>
+              </div>
+            </div>
+            <div class="u-align-center u-list-item u-repeater-item">
+              <div class="u-container-layout u-similar-container u-container-layout-7">
+                <div class="u-align-center u-container-style u-expanded-width u-group u-palette-1-base u-radius u-shape-round u-group-4">
+                  <div class="u-container-layout u-container-layout-8">
+                    <h4 class="u-text u-text-12">PM 2.5</h4>
+                    <h1 class="u-text u-text-4"><div id="myElement4">D1</div></h1>
+                      <div id="myimgElement4"></div> </div>
+                </div>
+                <h3 class="u-text u-text-default u-text-5"><div id="date3"></div></h3>
+
+                <script>
+                  // Function to format date in Thai abbreviated format
+                  function formatDateThaiAbbreviated(date) {
+                    const thaiMonths = [
+                      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+                    ];
+
+                    const dayOfMonth = date.getDate()+3;
+                    const month = thaiMonths[date.getMonth()];
+
+                    return `${dayOfMonth} ${month}`;
+                  }
+
+                  var date3 = new Date();
+                  var formattedDate = formatDateThaiAbbreviated(date3);
+
+                  document.getElementById("date3").innerHTML = formattedDate;
+                </script>
+               
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="u-align-center u-clearfix u-section-3" id="sec-3def">
+      <div class="u-clearfix u-sheet u-sheet-1">
+        <center><div id="adtoday"></div></center>
+      </div>
+    </section>
+    <section class="u-align-center u-clearfix u-section-3" id="sec-3def">
+      <div class="u-clearfix u-sheet u-sheet-1">
+        <h1>พยากรอากาศ</h1>
+        <div><iframe src= "https://www.tmd.go.th/weatherForecast7DaysWidget?province=เชียงใหม่" height="500" width="1050" scrolling="no" frameborder="0"></iframe></div>
+      </div>
+    </section>
+    
+    <footer class="u-align-center u-clearfix u-footer u-grey-80 u-footer" id="sec-bc68">
+      <div class="u-clearfix u-sheet u-sheet-1">
+        <p class="u-small-text u-text u-text-variant u-text-1"></p>
+        <a href="Contact.html">
+          <center>เยี่ยมชมสิ่งไม่น่าสนใจ กราฟข้อมูล เอกสารรายงาน และอื่น ๆ ที่นี่</center>
+      </div></footer>
+  
+  
+</body></html>
